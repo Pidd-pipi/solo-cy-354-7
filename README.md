@@ -49,6 +49,7 @@ cd frontend
 npm install
 npm run dev
 npm run build
+npm test        # 运行 Vitest 单元测试（如收藏状态缓存 favoriteStore.test.ts）
 ```
 
 本地开发时前端 Vite 将 `/api` 代理到 `http://localhost:29514`。
@@ -79,7 +80,7 @@ cy-354/
 │   └── internal/
 │       ├── config/          # 环境变量配置
 │       ├── constants/       # product.go, trade.go, user.go, error_codes.go, log_templates.go, messages.go
-│       ├── model/           # user, product, conversation, message, trade_order, review, book_exchange
+│       ├── model/           # user, product, favorite, conversation, message, trade_order, review, book_exchange
 │       ├── repository/      # GORM 仓库（按实体分文件）
 │       ├── service/         # 业务逻辑（按实体分文件）
 │       ├── handler/         # HTTP 处理器（按实体分文件）
@@ -91,11 +92,11 @@ cy-354/
     ├── Dockerfile
     ├── nginx.conf
     └── src/
-        ├── api/             # user, product, conversation, tradeOrder, review, bookExchange
-        ├── stores/          # authStore, userStore, productStore, tradeStore
-        ├── components/common/# ProductCard, ProductForm, MessageBubble, TradeStatusBadge, ExchangeCard
+        ├── api/             # user, product, favorite, conversation, tradeOrder, review, bookExchange
+        ├── stores/          # authStore, userStore, productStore, favoriteStore, tradeStore
+        ├── components/common/# ProductCard, FavoriteButton, ProductForm, MessageBubble, TradeStatusBadge, ExchangeCard
         ├── hooks/           # useAuth, useProducts, useConversations
-        ├── pages/           # Products, Publish, Messages, Orders, BookExchange, Graduation, Profile, Login, Register
+        ├── pages/           # Products, Favorites, Publish, Messages, Orders, BookExchange, Graduation, Profile, Login, Register
         ├── router/          # index.ts + guards.ts
         ├── utils/           # request, dateFormat, priceFormatter
         ├── constants/       # product, trade, user, errorCodes
@@ -138,6 +139,7 @@ cy-354/
 - 核心接口：
   - `POST /api/v1/users/register`、`POST /api/v1/users/login`、`GET/PUT /api/v1/users/me`
   - `GET/POST /api/v1/products`、`GET/DELETE /api/v1/products/:id`、`GET /api/v1/products/graduation`
+  - 商品收藏：`POST/DELETE /api/v1/products/:id/favorite`、`GET /api/v1/favorites`（可按 `status` 筛选）、`POST /api/v1/favorites/state`、`GET /api/v1/favorites/count/:id`
   - `POST /api/v1/conversations`、`GET /api/v1/conversations/me`、`GET/POST /api/v1/conversations/:id/messages`
   - `POST /api/v1/trade-orders`、`GET /api/v1/trade-orders/me`、`POST /api/v1/trade-orders/:id/buyer-confirm|seller-confirm|cancel`
   - `POST /api/v1/reviews`、`GET /api/v1/reviews/me`
@@ -160,6 +162,11 @@ cy-354/
 | GET | `/api/v1/products/:id` | 商品详情 | 无 |
 | POST | `/api/v1/products` | 发布商品 | 登录 |
 | DELETE | `/api/v1/products/:id` | 下架自己的商品 | 登录 |
+| POST | `/api/v1/products/:id/favorite` | 收藏商品（幂等，不能收藏自己的商品） | 登录 |
+| DELETE | `/api/v1/products/:id/favorite` | 取消收藏（幂等） | 登录 |
+| GET | `/api/v1/favorites` | 我的收藏，支持 `status=on_sale/sold/removed` 筛选与分页 | 登录 |
+| POST | `/api/v1/favorites/state` | 批量查询收藏标记与各商品收藏数 | 登录 |
+| GET | `/api/v1/favorites/count/:id` | 某商品的收藏数量 | 无 |
 | POST | `/api/v1/conversations` | 发起/复用私信会话 | 登录 |
 | GET | `/api/v1/conversations/me` | 我的会话列表 | 登录 |
 | GET | `/api/v1/conversations/:id/messages` | 会话消息记录 | 登录 |

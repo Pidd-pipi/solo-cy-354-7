@@ -61,6 +61,16 @@ func seed(ctx context.Context, db *gorm.DB, logger *slog.Logger) error {
 	if err := db.WithContext(ctx).Create(&products).Error; err != nil {
 		return fmt.Errorf("seed products: %w", err)
 	}
+	// Seed a few favorites across users so the favorites page has data on boot.
+	// A user only favorites other people's products.
+	favorites := []model.Favorite{
+		{UserID: users[1].ID, ProductID: products[0].ID},
+		{UserID: users[0].ID, ProductID: products[1].ID},
+		{UserID: users[0].ID, ProductID: products[2].ID},
+	}
+	if err := db.WithContext(ctx).Create(&favorites).Error; err != nil {
+		return fmt.Errorf("seed favorites: %w", err)
+	}
 	exchanges := []model.BookExchange{
 		{UserID: users[0].ID, OfferBook: "数据结构", WantBook: "计算机网络", Description: "希望交换", Status: "open"},
 		{UserID: users[1].ID, OfferBook: "计算机网络", WantBook: "数据结构", Description: "同城交换", Status: "open"},

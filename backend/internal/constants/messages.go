@@ -20,4 +20,8 @@ const (
 	MsgExchangeClosed      = "该交换已关闭"
 	MsgNoMatch             = "暂未找到匹配的书籍交换"
 	MsgReportTarget        = "举报对象无效"
+	MsgFavoriteOwnProduct  = "不能收藏自己发布的商品"
+	MsgFavoriteProductGone = "商品不存在，无法收藏"
+	MsgFavoriteNotExists   = "尚未收藏该商品"
+	MsgFavoriteStatusInvalid = "收藏筛选状态不合法"
 )

@@ -32,6 +32,16 @@ CREATE TABLE IF NOT EXISTS products (
   INDEX idx_products_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS favorites (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  product_id BIGINT UNSIGNED NOT NULL,
+  created_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+  UNIQUE KEY uniq_fav_user_product (user_id, product_id),
+  INDEX idx_favorites_user (user_id),
+  INDEX idx_favorites_product (product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS conversations (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   product_id BIGINT UNSIGNED NOT NULL,
@@ -107,6 +117,12 @@ INSERT INTO products (seller_id, title, description, price, category, `condition
 (2, 'iPad Air 5', '95新，带笔', 2800.00, 'electronics', '95新', '西校区', '三食堂', '', 'on_sale'),
 (3, '宿舍小台灯', '暖光护眼', 20.00, 'daily', '全新', '南校区', '南门快递点', '', 'on_sale'),
 (1, '毕业季正装一套', 'M码 黑色西服', 180.00, 'clothing', '九成新', '东校区', '东门', '', 'on_sale');
+
+-- 收藏种子（均收藏他人商品；唯一约束保证同一用户对同一商品只有一条）
+INSERT INTO favorites (user_id, product_id) VALUES
+(2, 1),
+(1, 2),
+(1, 3);
 
 INSERT INTO book_exchanges (user_id, offer_book, want_book, description, status) VALUES
 (1, '数据结构', '计算机网络', '希望交换', 'open'),

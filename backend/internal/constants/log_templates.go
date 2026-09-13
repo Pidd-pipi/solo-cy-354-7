@@ -32,7 +32,13 @@ const (
 	LogRateLimitReached            = "rate limit reached: ip=%s route=%s"
 	LogSeedingCompleted            = "database seeding completed: users=%d products=%d"
 	LogReportHandleSuccess         = "report handled: report_id=%d action=%s"
+	LogFavoriteAddSuccess          = "favorite add success: user_id=%d product_id=%d"
+	LogFavoriteAddDuplicate        = "favorite add duplicated (idempotent): user_id=%d product_id=%d"
+	LogFavoriteAddFailed           = "favorite add failed: user_id=%d product_id=%d error=%v"
+	LogFavoriteCancelSuccess       = "favorite cancel success: user_id=%d product_id=%d"
+	LogFavoriteCancelFailed        = "favorite cancel failed: user_id=%d product_id=%d error=%v"
+	LogFavoriteListSuccess         = "favorite list success: user_id=%d status=%s count=%d"
 )
 
 // LogTemplateCount guards the "at least 25 templates" requirement.
-const LogTemplateCount = 31
+const LogTemplateCount = 37

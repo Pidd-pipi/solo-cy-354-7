@@ -10,6 +10,9 @@
         <el-menu-item index="/publish">发布商品</el-menu-item>
         <el-menu-item index="/messages">私信</el-menu-item>
         <el-menu-item index="/orders">我的交易</el-menu-item>
+        <el-menu-item v-if="authStore.token" index="/favorites">
+          我的收藏<i v-if="favStore.mineCount > 0" class="fav-badge">{{ favStore.mineCount }}</i>
+        </el-menu-item>
         <el-menu-item index="/book-exchange">书籍交换</el-menu-item>
         <el-menu-item index="/graduation">毕业季专场</el-menu-item>
         <el-menu-item index="/profile">个人中心</el-menu-item>
@@ -32,22 +35,41 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from './stores/authStore'
+import { useFavoriteStore } from './stores/favoriteStore'
 
 const authStore = useAuthStore()
+const favStore = useFavoriteStore()
 const router = useRouter()
 
 function logout() {
   authStore.logout()
+  favStore.reset()
   ElMessage.success('已退出登录')
   router.push('/products')
 }
 
+// 登录状态变化（登录/退出/重新登录）时同步收藏缓存与角标数量
+watch(
+  () => authStore.token,
+  (token, oldToken) => {
+    if (!token) {
+      favStore.reset()
+    } else if (token !== oldToken) {
+      favStore.reset()
+      favStore.refreshMineCount()
+    }
+  },
+)
+
 onMounted(() => {
   authStore.restore()
+  if (authStore.token) {
+    favStore.refreshMineCount()
+  }
 })
 </script>
 
@@ -95,6 +117,20 @@ body {
 .user-chip {
   color: #606266;
   font-size: 14px;
+}
+.fav-badge {
+  display: inline-block;
+  margin-left: 6px;
+  min-width: 18px;
+  padding: 0 5px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  font-style: normal;
+  font-size: 12px;
+  color: #fff;
+  background: #f56c6c;
+  border-radius: 9px;
 }
 .app-main {
   max-width: 1200px;

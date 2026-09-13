@@ -39,7 +39,7 @@ func main() {
 	defer sqlDB.Close()
 
 	if err := db.AutoMigrate(
-		&model.User{}, &model.Product{}, &model.Conversation{}, &model.Message{},
+		&model.User{}, &model.Product{}, &model.Favorite{}, &model.Conversation{}, &model.Message{},
 		&model.TradeOrder{}, &model.Review{}, &model.BookExchange{},
 	); err != nil {
 		logger.Error("auto migrate failed", slog.String("error", err.Error()))

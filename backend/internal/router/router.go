@@ -37,6 +37,7 @@ func New(cfg *config.Config, db *gorm.DB, logger *slog.Logger) *gin.Engine {
 	// repositories
 	userRepo := repository.NewUserRepository(db)
 	productRepo := repository.NewProductRepository(db)
+	favoriteRepo := repository.NewFavoriteRepository(db)
 	convRepo := repository.NewConversationRepository(db)
 	orderRepo := repository.NewTradeOrderRepository(db)
 	reviewRepo := repository.NewReviewRepository(db)
@@ -45,6 +46,7 @@ func New(cfg *config.Config, db *gorm.DB, logger *slog.Logger) *gin.Engine {
 	// services
 	userSvc := service.NewUserService(userRepo, cfg.JWTSecret, cfg.JWTExpireHours, logger)
 	productSvc := service.NewProductService(productRepo, logger)
+	favoriteSvc := service.NewFavoriteService(favoriteRepo, productRepo, logger)
 	convSvc := service.NewConversationService(convRepo, logger)
 	orderSvc := service.NewTradeOrderService(orderRepo, productRepo, logger)
 	reviewSvc := service.NewReviewService(reviewRepo, orderRepo, userRepo, logger)
@@ -53,6 +55,7 @@ func New(cfg *config.Config, db *gorm.DB, logger *slog.Logger) *gin.Engine {
 	// handlers
 	userH := handler.NewUserHandler(userSvc, logger)
 	productH := handler.NewProductHandler(productSvc, logger)
+	favoriteH := handler.NewFavoriteHandler(favoriteSvc, logger)
 	convH := handler.NewConversationHandler(convSvc, productSvc, userSvc, logger)
 	orderH := handler.NewTradeOrderHandler(orderSvc, userSvc, logger)
 	reviewH := handler.NewReviewHandler(reviewSvc, userSvc, logger)
@@ -67,6 +70,7 @@ func New(cfg *config.Config, db *gorm.DB, logger *slog.Logger) *gin.Engine {
 	{
 		RegisterUserRoutes(v1, userH, auth, loginLimiter, apiLimiter)
 		RegisterProductRoutes(v1, productH, auth, apiLimiter)
+		RegisterFavoriteRoutes(v1, favoriteH, auth, apiLimiter)
 		RegisterConversationRoutes(v1, convH, auth, apiLimiter)
 		RegisterTradeOrderRoutes(v1, orderH, auth, apiLimiter)
 		RegisterReviewRoutes(v1, reviewH, auth, apiLimiter)

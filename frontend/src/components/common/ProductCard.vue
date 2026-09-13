@@ -15,16 +15,36 @@
       <el-button size="small" @click="$emit('detail', product)">详情</el-button>
       <el-button v-if="!hideBuy" size="small" type="primary" :disabled="product.status !== 'on_sale'" @click="$emit('buy', product)">购买</el-button>
       <el-button v-if="showChat" size="small" @click="$emit('chat', product)">私信</el-button>
+      <FavoriteButton v-if="!isOwn" :product="product" class="fav-btn" @changed="onFavoriteChanged" />
     </div>
   </el-card>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Product } from '../../types'
 import { categoryLabel, productStatusLabel, productStatusType } from '../../constants/product'
+import FavoriteButton from './FavoriteButton.vue'
+import { useAuthStore } from '../../stores/authStore'
 
-withDefaults(defineProps<{ product: Product; hideBuy?: boolean; showChat?: boolean }>(), { hideBuy: false, showChat: false })
-defineEmits<{ (e: 'detail', p: Product): void; (e: 'buy', p: Product): void; (e: 'chat', p: Product): void }>()
+const props = withDefaults(
+  defineProps<{ product: Product; hideBuy?: boolean; showChat?: boolean }>(),
+  { hideBuy: false, showChat: false },
+)
+const emit = defineEmits<{
+  (e: 'detail', p: Product): void
+  (e: 'buy', p: Product): void
+  (e: 'chat', p: Product): void
+  (e: 'favorite', p: Product, favorited: boolean): void
+}>()
+
+const authStore = useAuthStore()
+// 自己发布的商品不展示收藏按钮
+const isOwn = computed(() => !!authStore.user && authStore.user.id === props.product.seller_id)
+
+function onFavoriteChanged(favorited: boolean) {
+  emit('favorite', props.product, favorited)
+}
 </script>
 
 <style scoped>
@@ -60,5 +80,14 @@ defineEmits<{ (e: 'detail', p: Product): void; (e: 'buy', p: Product): void; (e:
   font-size: 12px;
   color: #606266;
   margin: 8px 0;
+}
+.product-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fav-btn {
+  margin-left: auto;
 }
 </style>

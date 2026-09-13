@@ -31,8 +31,14 @@
         <el-descriptions-item label="交易地点">{{ current.trade_location }}</el-descriptions-item>
         <el-descriptions-item label="价格">¥{{ current.price.toFixed(2) }}</el-descriptions-item>
         <el-descriptions-item label="状态">{{ productStatusLabel(current.status) }}</el-descriptions-item>
+        <el-descriptions-item label="收藏数">{{ favStore.countText(current.id) }}</el-descriptions-item>
         <el-descriptions-item label="描述" :span="2">{{ current.description }}</el-descriptions-item>
       </el-descriptions>
+      <template #footer>
+        <FavoriteButton v-if="current && !isOwn(current)" :product="current" />
+        <el-button @click="chat(current!)" :disabled="current.status !== 'on_sale'">私信卖家</el-button>
+        <el-button type="primary" @click="buy(current!)" :disabled="current.status !== 'on_sale'">立即购买</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -41,12 +47,14 @@
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import ProductCard from '../components/common/ProductCard.vue'
+import FavoriteButton from '../components/common/FavoriteButton.vue'
 import { PRODUCT_CATEGORIES, categoryLabel, productStatusLabel } from '../constants/product'
 import { useProducts } from '../hooks/useProducts'
 import { createTradeOrder } from '../api/tradeOrder'
 import { createConversation } from '../api/conversation'
 import type { Product } from '../types'
 import { useAuthStore } from '../stores/authStore'
+import { useFavoriteStore } from '../stores/favoriteStore'
 import { useRouter } from 'vue-router'
 
 const { products, loading, load } = useProducts()
@@ -54,7 +62,12 @@ const query = reactive<{ category?: string; campus?: string; keyword?: string }>
 const detailVisible = ref(false)
 const current = ref<Product | null>(null)
 const authStore = useAuthStore()
+const favStore = useFavoriteStore()
 const router = useRouter()
+
+function isOwn(p: Product | null): boolean {
+  return !!p && !!authStore.user && authStore.user.id === p.seller_id
+}
 
 function showDetail(p: Product) {
   current.value = p

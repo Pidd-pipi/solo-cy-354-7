@@ -84,3 +84,15 @@ export interface PageResult<T> {
   page: number
   page_size: number
 }
+
+export interface FavoriteAction {
+  product_id: number
+  favorited: boolean
+  count: number
+  duplicated: boolean
+}
+
+export interface FavoriteState {
+  favorited: Record<string, boolean>
+  counts: Record<string, number>
+}
